@@ -1,3 +1,14 @@
+# Implements the method described in:
+#@article{park_robot_1994,
+#  title = {Robot sensor calibration: solving {AX}= {XB} on the {Euclidean} group},
+#  volume = {10},
+#  number = {5},
+#  journal = {IEEE Transactions on Robotics and Automation},
+#  author = {Park, Frank C and Martin, Bryan J},
+#  year = {1994},
+#  pages = {717--721}
+#}
+
 import numpy
 from numpy import dot, eye, zeros, outer
 from numpy.linalg import inv
