@@ -9,11 +9,11 @@ from numpy import dot, eye
 import sys
 
 if sys.version_info.major > 2:
-    img_list = pickle.load(open('image_list.dump', 'rb'), encoding = 'latin1')
-    rob_pose_list = pickle.load(open('pose_list.dump', 'rb'), encoding = 'latin1')
+    img_list = pickle.load(open('data/image_list.dump', 'rb'), encoding = 'latin1')
+    rob_pose_list = pickle.load(open('data/pose_list.dump', 'rb'), encoding = 'latin1')
 else:
-    img_list = pickle.load(open('image_list.dump', 'rb'))
-    rob_pose_list = pickle.load(open('pose_list.dump', 'rb'))
+    img_list = pickle.load(open('data/image_list.dump', 'rb'))
+    rob_pose_list = pickle.load(open('data/pose_list.dump', 'rb'))
 
 corner_list = []
 obj_pose_list = []
