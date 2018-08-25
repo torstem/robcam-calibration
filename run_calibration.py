@@ -1,24 +1,33 @@
-import cPickle as pickle
+import pickle
 import numpy
 import chessboard
 import park_martin
 import yaml
-numpy.set_printoptions(linewidth=300)
-from scipy.linalg import expm3, inv
+numpy.set_printoptions(linewidth=300, suppress=True)
+from scipy.linalg import expm, inv
 from numpy import dot, eye
+import sys
 
-img_list = pickle.load(open('image_list.dump'))
-rob_pose_list = pickle.load(open('pose_list.dump'))
+if sys.version_info.major > 2:
+    img_list = pickle.load(open('image_list.dump', 'rb'), encoding = 'latin1')
+    rob_pose_list = pickle.load(open('pose_list.dump', 'rb'), encoding = 'latin1')
+else:
+    img_list = pickle.load(open('image_list.dump', 'rb'))
+    rob_pose_list = pickle.load(open('pose_list.dump', 'rb'))
+
 corner_list = []
 obj_pose_list = []
 
 camera_matrix, dist_coeffs = chessboard.calibrate_lens(img_list)
 
+def hat(v):
+    return [[   0, -v[2],  v[1]],
+            [v[2],     0, -v[0]],
+            [-v[1],  v[0],    0]]
+
 def tf_mat(r, t):
     res = eye(4)
-    res[0:3, 0:3] = expm3([[   0, -r[2],  r[1]],
-                           [r[2],     0, -r[0]],
-                           [-r[1],  r[0],    0]])
+    res[0:3, 0:3] = expm(hat(r))
     res[0:3, -1] = t
     return res
 
@@ -40,23 +49,27 @@ for i in range(1,len(img_list)):
 
 
 # Transformation to chessboard in robot gripper
-cie = eye(4)
+X = eye(4)
 Rx, tx = park_martin.calibrate(A, B)
-cie[0:3, 0:3] = Rx
-cie[0:3, -1] = tx
+X[0:3, 0:3] = Rx
+X[0:3, -1] = tx
 
-# Compute transformations to camera.
-# All the transformations should be quite similar
+print("X: ")
+print(X)
+
+print("For validation. Printing transformations from the robot base to the camera")
+print("All the transformations should be quite similar")
+
 for i in range(len(img_list)):
     rob = rob_pose_list[i]
     obj = obj_pose_list[i]
-    tmp = dot(rob, dot(cie, inv(obj)))
+    tmp = dot(rob, dot(X, inv(obj)))
     print(tmp)
 
 # Here I just pick one, but maybe some average can be used instead
 rob = rob_pose_list[0]
 obj = obj_pose_list[0]
-cam_pose = dot(dot(rob, cie), inv(obj))
+cam_pose = dot(dot(rob, X), inv(obj))
 
 cam = {'rotation' : cam_pose[0:3, 0:3].tolist(),
        'translation' : cam_pose[0:3, -1].tolist(),
